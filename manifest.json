@@ -1,15 +1,21 @@
 {
-  "name": "Manà Sport Delay",
-  "short_name": "Manà Delay",
-  "description": "Player web per Manà Manà Sport Roma con pausa e buffer del browser.",
-  "start_url": "./index.html",
-  "scope": "./",
+  "name": "Manà Manà Sport Roma",
+  "short_name": "Manà Sport",
+  "start_url": "./",
   "display": "standalone",
-  "orientation": "portrait",
   "background_color": "#0b1020",
   "theme_color": "#10142a",
+  "orientation": "portrait",
   "icons": [
-    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
   ]
 }
