@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Manà Sport Delay</title>
+  <meta name="theme-color" content="#10142a">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Manà Delay">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="favicon.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <style>
+    :root{--bg:#0b1020;--card:#151b33;--text:#f6f7fb;--muted:#aab0c5;--accent:#ff8a00;--cyan:#22d3ee;--line:#2a3152}
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    body{margin:0;min-height:100vh;background:radial-gradient(circle at top,#252d57 0,#0b1020 52%,#070a12 100%);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;color:var(--text);display:flex;align-items:center;justify-content:center;padding:18px}
+    .app{width:min(440px,100%);text-align:center}.cover{width:min(330px,82vw);aspect-ratio:1;margin:6px auto 26px;border-radius:26px;overflow:hidden;box-shadow:0 24px 60px #0008;background:#fff}.cover img{width:100%;height:100%;object-fit:cover;display:block}
+    h1{font-size:27px;margin:0 0 4px;line-height:1.1}.sub{color:var(--muted);margin-bottom:22px;font-size:16px}.audioBox{background:#eef1f8;border-radius:999px;padding:4px 10px;margin:0 auto 24px;box-shadow:0 14px 35px #0004} audio{width:100%;display:block}
+    .bar{height:8px;background:#dfe3ef22;border-radius:99px;overflow:hidden;margin:18px 0 8px}.progress{height:100%;width:0%;background:var(--accent);border-radius:99px;transition:width .2s}.times{display:flex;justify-content:space-between;color:#d8dcee;font-size:17px;margin-bottom:26px}.status.live{color:#fff}.status.delay{color:var(--accent)}
+    .controls{display:flex;align-items:center;justify-content:center;gap:22px;margin:12px 0 24px}.btn{border:0;border-radius:999px;background:#eef1f8;color:#09101d;width:86px;height:86px;font-size:32px;font-weight:900;box-shadow:0 12px 30px #0006}.btn:active{transform:scale(.96)}.small{width:68px;height:68px;font-size:19px}.big{font-size:40px}.row{display:flex;justify-content:center;gap:18px;margin-bottom:18px}.liveBtn{background:var(--cyan);color:#06111a;width:132px;font-size:29px}.reset{background:var(--accent);color:#150b00;width:96px}
+    .hint{border-top:1px solid var(--line);padding-top:16px;color:var(--muted);font-size:13px;line-height:1.45}.dot{display:inline-block;width:9px;height:9px;border-radius:99px;background:#22c55e;margin-right:7px}.url{font-size:11px;word-break:break-all;color:#cfd4e8;background:#0004;border-radius:12px;padding:10px;margin-top:12px}
+  </style>
+</head>
+<body>
+  <main class="app">
+    <div class="cover"><img src="icons/icon-512.png" alt="Manà Manà Sport"></div>
+    <h1>Manà Manà Sport Roma</h1>
+    <div class="sub">Player web con pausa/buffer del browser</div>
+
+    <div class="audioBox">
+      <audio id="audio" controls preload="auto">
+        <source src="https://stream10.xdevel.com/audio21s975363-3065/stream/icecast.audio" type="audio/aac">
+      </audio>
+    </div>
+
+    <div class="bar"><div id="progress" class="progress"></div></div>
+    <div class="times"><span id="elapsed">0:00</span><span id="status" class="status live">LIVE</span><span id="delay">0:00</span></div>
+
+    <div class="controls">
+      <button class="btn small" onclick="skip(-30)">↶30</button>
+      <button id="play" class="btn big" onclick="togglePlay()">▶</button>
+      <button class="btn small" onclick="skip(30)">30↷</button>
+    </div>
+    <div class="row">
+      <button class="btn liveBtn" onclick="goLive()">LIVE</button>
+      <button class="btn reset" onclick="restart()">↻</button>
+    </div>
+
+    <div class="hint">
+      <span class="dot"></span>Buffer del browser attivo. Per sincronizzare: premi pausa per il ritardo necessario, poi play.
+      <div class="url">https://stream10.xdevel.com/audio21s975363-3065/stream/icecast.audio</div>
+    </div>
+  </main>
+<script>
+const STREAM='https://stream10.xdevel.com/audio21s975363-3065/stream/icecast.audio';
+const audio=document.getElementById('audio'), play=document.getElementById('play'), progress=document.getElementById('progress');
+const elapsed=document.getElementById('elapsed'), statusEl=document.getElementById('status'), delayEl=document.getElementById('delay');
+function fmt(s){s=Math.max(0,Math.floor(s||0));let m=Math.floor(s/60),r=s%60;return m+':'+String(r).padStart(2,'0')}
+function togglePlay(){ audio.paused ? audio.play() : audio.pause(); }
+function restart(){ audio.src=STREAM+'?t='+Date.now(); audio.play(); }
+function goLive(){ restart(); }
+function skip(sec){ try{ audio.currentTime=Math.max(0,audio.currentTime+sec) }catch(e){} }
+audio.addEventListener('play',()=>play.textContent='Ⅱ');
+audio.addEventListener('pause',()=>play.textContent='▶');
+setInterval(()=>{
+  elapsed.textContent=fmt(audio.currentTime);
+  let buffered=audio.currentTime;
+  try{ if(audio.buffered.length) buffered=audio.buffered.end(audio.buffered.length-1); }catch(e){}
+  const pct=buffered?Math.min(100,(audio.currentTime/buffered)*100):0; progress.style.width=pct+'%';
+  const lag=Math.max(0,buffered-audio.currentTime); delayEl.textContent=lag<3?'0:00':'-'+fmt(lag);
+  statusEl.textContent=lag<3?'LIVE':'DELAY'; statusEl.className='status '+(lag<3?'live':'delay');
+},500);
+if ('serviceWorker' in navigator) { window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{})); }
+</script>
+</body>
+</html>
